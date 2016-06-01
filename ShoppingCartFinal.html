@@ -1,0 +1,213 @@
+<!-- *********************************************************************************
+This is Kivi Dollin's Shooping Cart Program. Javascript/CSS/HTML using Angular.js
+To Run: Simply open ShoppingCartFinal.html in a browser
+Akiva Dollin - acd2164@columbia.edu
+********************************************************************************* -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <h1>Welcome to Kivi's Shopping Program!!!</h1>
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+
+  <style type="text/css">
+
+    #left_table {
+        width: 47.5%;
+        float: left;
+    }
+
+    #right_table {
+        width: 47.5%;
+        float: right;
+    }
+
+  </style>
+</head>
+
+<body>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script type="text/javascript" src="app.js"></script>
+
+  <script>
+
+    var app = angular.module("myShoppingList", []); 
+
+    app.controller("tabController", function(){
+      this.tab=1;
+
+      this.setTab= function(setTab){
+        this.tab=setTab;
+      };
+
+      this.isSet= function(checkTab){
+        return this.tab === checkTab;
+      };
+    });
+
+    app.controller("storeController", function($scope) {
+      $scope.errortext = "";
+      $scope.total = 0;
+      $scope.itemCount = 0;
+      $scope.distinctItemCount = 0;
+
+      $scope.list = [
+        {x:"Butter",y:10, description:"This is butter.", review: "Good", quantity: 1}, 
+        {x:"Jelly",y:5, description:"This is jelly.", review: "OK", quantity: 1}, 
+        {x:"Tea",y:1.5, description:"This is tea.", review: "Fine", quantity: 1},
+        {x:"Milk",y:3, description:"This is milk.", review: "gross", quantity: 1},
+        {x:"Cocoa",y:8, description:"This is yum.", review: "Great", quantity: 1},
+        {x:"Bread",y:2, description:"This is bread.", review: "iffy", quantity: 1}, 
+        {x:"Laptop",y:100, description:"This is a Mac.", review: "Excellent", quantity: 1}
+        ];
+
+      $scope.cart = [{x:"Butter",y:10, description:"This is butter.", review: "Good", quantity: 1}];
+
+      // this function needs to add objects into the cart list
+      $scope.addItem = function (item, index) {
+        $scope.errortext = "";
+        for(temp in $scope.cart)
+        {
+          if($scope.list[index].x == $scope.cart[temp].x)
+          {
+            $scope.cart[temp].quantity += 1;
+            $scope.cart[temp].y += $scope.list[index].y;          
+            return;
+          }
+        }
+        $scope.cart.push(Object.assign([], item));
+        return;
+      }
+
+      $scope.removeListItem = function (x) {
+        $scope.errortext = "";
+        $scope.list.splice(x, 1);
+      }
+
+      $scope.removeCartItem = function (x) {
+        $scope.errortext = "";    
+        $scope.cart.splice(x, 1);
+      }
+
+      $scope.decrementItem = function (item, index) {
+        $scope.errortext = "";
+        for( temp in $scope.list)
+        {
+          if($scope.list[temp].x == $scope.cart[index].x)
+          {
+            if($scope.cart[index].y - $scope.list[temp].y > 0)
+            {
+              $scope.cart[index].quantity = $scope.cart[index].quantity - 1;
+              $scope.cart[index].y = $scope.cart[index].y - $scope.list[temp].y;
+            }
+            else{
+              $scope.cart.splice(index, 1);
+            }          
+            return;
+          }
+        }
+      }
+
+      //this is called by the CheckoutButton and must display the total from the cart list. 
+      $scope.showTotal = function () {
+          $scope.errortext = "";  
+          $scope.total = 0;
+          $scope.itemCount = 0;
+          $scope.distinctItemCount = 0;
+          for(temp in $scope.cart)
+          {
+            $scope.total += $scope.cart[temp].y;
+            $scope.itemCount += $scope.cart[temp].quantity;
+            $scope.distinctItemCount += 1;
+          }
+      }
+    });
+  </script>
+
+
+  <!-- table one: Shopping List -->
+  <div ng-app="myShoppingList" ng-cloak ng-controller="storeController as store">
+
+    <div class="w3-card-2 w3-margin" id="left_table">
+      <header class="w3-container w3-light-grey w3-padding-hor-16">
+        <h3>Available Items</h3>
+      </header>
+      <ul class="w3-ul">
+        <li ng-repeat="item in list track by $index" class="w3-padding-hor-16"><font size=4> {{item.x}} <em class="pull-center"> {{item.y | currency}}</em></font><em class="pull-right"><button ng-click="addItem(item, $index)" class="w3-btn w3-padding w3-green">Add To Cart</button> </em>
+          <section class="tab" ng-controller="tabController as tab">
+           <br>
+            <ul class="nav nav-pills">
+              <li ng-class="{ active: tab.isSet(1) }">
+                <a href ng-click="tab.setTab(1)"><font size=2.5>Description</font></a></li>
+              <li ng-class="{ active: tab.isSet(2) }">
+                <a href ng-click="tab.setTab(2)"><font size=2.5>Reviews</font></a></li>
+            </ul>
+            <div ng-show="tab.isSet(1)">
+              <h4><font size=2>Description</font></h4>
+              <blockquote><font size=2>{{item.description}}</font></blockquote>
+            </div>
+            <div ng-show="tab.isSet(2)">
+              <h4><font size=2>Reviews</font></h4>
+              <blockquote><font size=2>Review: {{item.review}}</font></blockquote>
+            </div>
+          </section>
+        </li>
+      </ul>
+      <div class="w3-container w3-light-grey w3-padding-hor-16">
+        <p class="w3-padding-left w3-text-red">{{errortext}}</p>
+      </div>
+    </div>
+
+
+    <!-- table two: My Cart -->
+    <div class="w3-card-2 w3-margin" id="right_table">
+      <header class="w3-container w3-light-grey w3-padding-hor-16">
+        <h3>My Cart</h3>
+      </header>
+      <ul class="w3-ul">
+        <li ng-repeat="item2 in cart" class="w3-padding-hor-16">{{item2.x}} (x{{item2.quantity}})  {{item2.y | currency}}   
+
+          <!-- <button ng-click="addItem(item2, $index)" class="w3-yellow">+</button> -->
+          
+          <button ng-click="decrementItem(item2, $index)" class="w3-red">-</button>
+
+          <span ng-click="removeCartItem($index)" style="cursor:pointer;" class="w3-right w3-margin-right">x</span></li>
+      </ul>
+    </div>
+
+
+    <!-- TotalsButton -->
+    <div class="w3-card-2 w3-margin" id="right_table">
+      <header class="w3-container w3-light-grey w3-padding-hor-16">
+        <h3>Calculate Totals</h3>
+      </header>
+      <ul class="w3-ul">
+        <li> <button ng-click="showTotal()" class="w3-btn w3-padding w3-green">Update Totals</button></li>
+        <li>Your Total is: {{total | currency}}</li>
+        <li>Number of Items: {{itemCount}}</li>
+        <li>Number of Distinct Items: {{distinctItemCount}}</li>
+      </ul>
+    </div>
+
+    <!-- CheckoutButton -->
+    <div class="w3-card-2 w3-margin" id="right_table">
+      <header class="w3-container w3-light-grey w3-padding-hor-16">
+        <h3>Checkout Here:</h3>
+      </header>
+      <ul class="w3-ul">
+        <li><button ng-click="showTotal(); showDetails = ! showDetails" class="w3-btn w3-padding w3-green">Checkout</button> 
+              <div class="procedure-details" ng-show="showDetails">
+                <br>
+                <p>This is your total: {{total | currency}}</p>
+                <p>Have a nice day!</p>
+              </div>
+        </li>
+      </ul>
+    </div>
+
+
+  </div>    <!--  module /div  --> 
+</body>
+</html>
